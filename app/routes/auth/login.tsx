@@ -4,7 +4,7 @@ import { Form, Link, useActionData } from "@remix-run/react";
 import { json, redirect } from "@remix-run/node";
 
 import type { ActionFunction } from "@remix-run/node";
-import { verifyLogin } from "~/models/user.server";
+import { verifyLogin } from "../../models/user.server";
 
 export const action: ActionFunction = async ({ request }) => {
   const formData = await request.formData();

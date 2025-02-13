@@ -39,7 +39,6 @@ services:
       - ./initdb:/docker-entrypoint-initdb.d
     networks:
       - web
-
 # Use an external network "web" shared by both apps
 networks:
   web:

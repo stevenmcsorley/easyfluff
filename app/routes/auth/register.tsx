@@ -1,7 +1,7 @@
 // app/routes/auth/register.tsx
 
 import { Form, Link, useActionData } from "@remix-run/react";
-import { createUser, getUserByEmail } from "~/models/user.server";
+import { createUser, getUserByEmail } from "../../models/user.server";
 import { json, redirect } from "@remix-run/node";
 
 import type { ActionFunction } from "@remix-run/node";

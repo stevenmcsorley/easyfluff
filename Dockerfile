@@ -1,34 +1,61 @@
+# # Use an official Node.js image
+# FROM node:18-alpine
+
+
+# # Install bash (or just make sure sh is present)
+# RUN apk add --no-cache bash
+
+# # Set working directory
+# WORKDIR /app
+
+# # Copy package files and install dependencies
+# COPY package.json package-lock.json ./
+# RUN npm install
+
+# # Copy the rest of your application code
+# COPY . .
+
+# # Expose the port your Remix app uses (5173)
+# EXPOSE 5173
+
+# # Start Remix in development mode and bind to all network interfaces
+# CMD ["npm", "run", "dev", "--", "--host"]
+
 # Stage 1: Build the Remix app
-FROM node:20-alpine AS builder
+FROM node:18-alpine AS builder
+
+# Set working directory
 WORKDIR /app
 
-# Copy package files and Vite config from the local app folder
-COPY app/package*.json ./
-COPY app/vite.config.ts ./
-# (Optional) Copy remix.config.js if you use one:
-COPY app/vite.config.ts ./
+# Copy package files and install dependencies
+COPY package.json package-lock.json ./
+RUN npm ci
 
-# Install dependencies
-RUN npm install
+# Copy the rest of your application code
+COPY . .
 
-# Copy the rest of the app source code into /app
-COPY app/ ./
-
-# Build the Remix app (runs "remix vite:build" as defined in package.json)
+# Build the Remix app for production
 RUN npm run build
 
-# Stage 2: Create the production image
-FROM node:20-alpine AS runner
+# Stage 2: Run the production app
+FROM node:18-alpine AS runner
+
+# Set working directory
 WORKDIR /app
 
-# Set NODE_ENV to production
-ENV NODE_ENV=production
+# Copy built files and public assets from the builder stage
+COPY --from=builder /app/build ./build
+COPY --from=builder /app/public ./public
 
-# Copy all files from the builder stage
-COPY --from=builder /app .
+# Copy package.json and package-lock.json into runner stage
+COPY --from=builder /app/package.json ./
+COPY --from=builder /app/package-lock.json ./
 
-# Expose the port the app listens on (typically 3000)
+# Install only production dependencies
+RUN npm ci --only=production
+
+# Expose the production port (adjust if needed)
 EXPOSE 3000
 
-# Start the Remix server using the start script defined in package.json
-CMD ["npm", "start"]
+# Start the production server
+CMD ["npm", "run", "start"]
