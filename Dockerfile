@@ -1,26 +1,3 @@
-# # Use an official Node.js image
-# FROM node:18-alpine
-
-
-# # Install bash (or just make sure sh is present)
-# RUN apk add --no-cache bash
-
-# # Set working directory
-# WORKDIR /app
-
-# # Copy package files and install dependencies
-# COPY package.json package-lock.json ./
-# RUN npm install
-
-# # Copy the rest of your application code
-# COPY . .
-
-# # Expose the port your Remix app uses (5173)
-# EXPOSE 5173
-
-# # Start Remix in development mode and bind to all network interfaces
-# CMD ["npm", "run", "dev", "--", "--host"]
-
 # Stage 1: Build the Remix app
 FROM node:18-alpine AS builder
 
@@ -47,15 +24,19 @@ WORKDIR /app
 COPY --from=builder /app/build ./build
 COPY --from=builder /app/public ./public
 
-# Copy package.json and package-lock.json into runner stage
+# Copy package files for production installs
 COPY --from=builder /app/package.json ./
 COPY --from=builder /app/package-lock.json ./
 
 # Install only production dependencies
 RUN npm ci --only=production
 
+# Copy the wait-for-it.sh script (make sure it's in your repository under "scripts/wait-for-it.sh")
+COPY scripts/wait-for-it.sh /usr/local/bin/wait-for-it.sh
+RUN chmod +x /usr/local/bin/wait-for-it.sh
+
 # Expose the production port (adjust if needed)
 EXPOSE 3000
 
-# Start the production server
-CMD ["npm", "run", "start"]
+# Start the production server using wait-for-it to ensure Postgres is up
+CMD ["/usr/local/bin/wait-for-it.sh", "db:5432", "--", "npm", "run", "start"]
