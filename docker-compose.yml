@@ -8,7 +8,8 @@ services:
     env_file:
       - .env
     depends_on:
-      - easyfluff_db_new
+      easyfluff_db_new:
+        condition: service_healthy
     labels:
       - "traefik.enable=true"
       # Primary router for EasyFluff; update the hostname to your production domain.
@@ -39,6 +40,11 @@ services:
       - ./initdb:/docker-entrypoint-initdb.d
     networks:
       - webserver
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U easyfluff_user -d easyfluff_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
 networks:
   webserver:
