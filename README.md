@@ -1,0 +1,3 @@
+# EasyFluff
+
+Project documentation.

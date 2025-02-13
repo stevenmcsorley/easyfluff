@@ -1,0 +1,49 @@
+version: "3.8"
+
+services:
+  easyfluff:
+    build: .
+    container_name: easyfluff_app
+    restart: always
+    env_file:
+      - .env
+    depends_on:
+      - db
+    labels:
+      - "traefik.enable=true"
+      # Primary router for EasyFluff; update the hostname to your production domain.
+      - "traefik.http.routers.easyfluff.rule=Host(`easyfluff.com`)"
+      - "traefik.http.routers.easyfluff.entrypoints=web"
+      - "traefik.http.routers.easyfluff-secure.tls=true"
+      - "traefik.http.services.easyfluff.loadbalancer.server.port=3000"
+      # Router for www redirect
+      - "traefik.http.routers.easyfluff-www.rule=Host(`www.easyfluff.com`)"
+      - "traefik.http.routers.easyfluff-www.entrypoints=web"
+      - "traefik.http.routers.easyfluff-www.middlewares=redirect-to-nonwww"
+      - "traefik.http.middlewares.redirect-to-nonwww.redirectregex.regex=^https?://www\\.easyfluff\\.com(.*)"
+      - "traefik.http.middlewares.redirect-to-nonwww.redirectregex.replacement=https://easyfluff.com$1"
+      - "traefik.http.middlewares.redirect-to-nonwww.redirectregex.permanent=true"
+    networks:
+      - web
+
+  db:
+    image: postgres:15-alpine
+    container_name: easyfluff_db
+    restart: always
+    environment:
+      POSTGRES_USER: easyfluff_user
+      POSTGRES_PASSWORD: supersecret
+      POSTGRES_DB: easyfluff_db
+    volumes:
+      - easyfluff_pg_data:/var/lib/postgresql/data
+      - ./initdb:/docker-entrypoint-initdb.d
+    networks:
+      - web
+
+# Use an external network "web" shared by both apps
+networks:
+  web:
+    external: true
+
+volumes:
+  easyfluff_pg_data:
