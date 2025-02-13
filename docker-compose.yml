@@ -39,10 +39,9 @@ services:
       - ./initdb:/docker-entrypoint-initdb.d
     networks:
       - webserver
-# Use an external network "web" shared by both apps
+
 networks:
-  web:
-    name: webserver
+  webserver:
     driver: bridge
 
 volumes:
