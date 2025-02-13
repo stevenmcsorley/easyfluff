@@ -1,19 +1,3 @@
-# Stage 1: Build the Remix app
-FROM node:18-alpine AS builder
-
-# Set working directory
-WORKDIR /app
-
-# Copy package files and install dependencies
-COPY package.json package-lock.json ./
-RUN npm ci
-
-# Copy the rest of your application code
-COPY . .
-
-# Build the Remix app for production
-RUN npm run build
-
 # Stage 2: Run the production app
 FROM node:18-alpine AS runner
 
@@ -28,10 +12,10 @@ COPY --from=builder /app/public ./public
 COPY --from=builder /app/package.json ./
 COPY --from=builder /app/package-lock.json ./
 
-# Install only production dependencies
-RUN npm ci --only=production
+# Install production dependencies and required packages for wait-for-it
+RUN apk add --no-cache bash netcat-openbsd && npm ci --only=production
 
-# Copy the wait-for-it.sh script (make sure it's in your repository under "scripts/wait-for-it.sh")
+# Copy the wait-for-it.sh script (ensure it's in your repository under "scripts/wait-for-it.sh")
 COPY scripts/wait-for-it.sh /usr/local/bin/wait-for-it.sh
 RUN chmod +x /usr/local/bin/wait-for-it.sh
 
