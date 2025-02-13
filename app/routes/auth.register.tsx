@@ -44,7 +44,7 @@ export default function Register() {
       {actionData?.error && (
         <p className="mb-4 text-red-600">{actionData.error}</p>
       )}
-      <Form method="post" className="space-y-4">
+      <Form method="post" data-turbo="false" className="space-y-4">
         <div>
           <label htmlFor="email" className="label">
             Email
