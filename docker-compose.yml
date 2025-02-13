@@ -35,7 +35,7 @@ services:
       POSTGRES_PASSWORD: supersecret
       POSTGRES_DB: easyfluff_db
     ports:
-      - "5433:5433" # External to internal mappi
+      - "5433:5432" # External to internal mappi
     volumes:
       - easyfluff_pg_data:/var/lib/postgresql/data
       - ./initdb:/docker-entrypoint-initdb.d
