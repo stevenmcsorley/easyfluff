@@ -1,21 +1,20 @@
 // app/routes/subscriptions/manage.tsx
 
 import type { ActionFunction, LoaderFunction } from "@remix-run/node";
-import { Form, useLoaderData, useNavigation } from "@remix-run/react";
+import { Form, useLoaderData, useTransition } from "@remix-run/react";
 import { json, redirect } from "@remix-run/node";
 
 import { client } from "~/utils/db.server";
 import { getSession } from "~/session.server";
 
 export const loader: LoaderFunction = async ({ request }) => {
-  // Check if the user is logged in
   const session = await getSession(request.headers.get("Cookie"));
   const userId = session.get("userId");
   if (!userId) {
     return redirect("/auth/login");
   }
 
-  // Get the active subscription (if any) for the user
+  // Fetch the active subscription for this user (if any)
   const subResult = await client.query(
     `SELECT us.*, s.name, s.description, s.price, s.frequency
      FROM user_subscriptions us
@@ -23,22 +22,18 @@ export const loader: LoaderFunction = async ({ request }) => {
      WHERE us.user_id = $1 AND us.active = true`,
     [userId]
   );
-  const currentSubscription =
-    subResult && subResult.rowCount !== null && subResult.rowCount > 0
-      ? subResult.rows[0]
-      : null;
+  const currentSubscription = subResult.rowCount > 0 ? subResult.rows[0] : null;
 
-  // Query all available subscription plans
-  const planResult = await client.query(
+  // Fetch all available subscription plans from the subscriptions table
+  const plansResult = await client.query(
     "SELECT * FROM subscriptions ORDER BY id ASC"
   );
-  const plans = planResult.rows;
+  const plans = plansResult.rows;
 
   return json({ currentSubscription, plans });
 };
 
 export const action: ActionFunction = async ({ request }) => {
-  // Ensure the user is logged in
   const session = await getSession(request.headers.get("Cookie"));
   const userId = session.get("userId");
   if (!userId) {
@@ -53,7 +48,7 @@ export const action: ActionFunction = async ({ request }) => {
     if (typeof newPlanId !== "string" || newPlanId.trim() === "") {
       return json({ error: "Invalid subscription plan" }, { status: 400 });
     }
-    // Update the user's active subscription with the new plan
+    // Update the active subscription with the new plan
     await client.query(
       `UPDATE user_subscriptions 
        SET subscription_id = $1, updated_at = NOW()
@@ -62,7 +57,7 @@ export const action: ActionFunction = async ({ request }) => {
     );
     return redirect("/dashboard");
   } else if (actionType === "cancel") {
-    // Cancel the user's active subscription by setting it to inactive
+    // Mark the active subscription as inactive
     await client.query(
       `UPDATE user_subscriptions 
        SET active = false, updated_at = NOW()
@@ -77,7 +72,7 @@ export const action: ActionFunction = async ({ request }) => {
 
 export default function ManageSubscription() {
   const { currentSubscription, plans } = useLoaderData<typeof loader>();
-  const transition = useNavigation();
+  const transition = useTransition();
 
   return (
     <div className="container mx-auto p-4">
@@ -112,18 +107,11 @@ export default function ManageSubscription() {
             defaultValue={currentSubscription?.subscription_id || ""}
           >
             <option value="">Select a new plan</option>
-            {plans.map(
-              (plan: {
-                id: number;
-                name: string;
-                price: number;
-                frequency: string;
-              }) => (
-                <option key={plan.id} value={plan.id}>
-                  {plan.name} - ${plan.price} per {plan.frequency}
-                </option>
-              )
-            )}
+            {plans.map((plan: any) => (
+              <option key={plan.id} value={plan.id}>
+                {plan.name} - ${plan.price} per {plan.frequency}
+              </option>
+            ))}
           </select>
           <button
             type="submit"
