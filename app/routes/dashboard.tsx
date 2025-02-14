@@ -1,11 +1,11 @@
 // app/routes/dashboard.tsx
 
+import { Link, useLoaderData } from "@remix-run/react";
 import { json, redirect } from "@remix-run/node";
 
 import type { LoaderFunction } from "@remix-run/node";
 import { client } from "~/utils/db.server";
 import { getSession } from "~/session.server";
-import { useLoaderData } from "@remix-run/react";
 
 export const loader: LoaderFunction = async ({ request }) => {
   const session = await getSession(request.headers.get("Cookie"));
@@ -79,6 +79,9 @@ export default function Dashboard() {
             <a href="/subscriptions" className="btn btn-outline">
               Manage Subscription
             </a>
+            <Link to="/pickups" className="btn btn-primary">
+              Schedule Pickup
+            </Link>
           </div>
         </div>
       </div>
