@@ -5,7 +5,7 @@ export default function Index() {
   return (
     <div
       className="hero min-h-screen bg-cover bg-center relative"
-      style={{ backgroundImage: "url('/easyfluff.png')" }}
+      style={{ backgroundImage: "url('/easyfluff-min.png')" }}
     >
       {/* Overlay for better text contrast */}
       <div className="absolute inset-0 bg-black opacity-40"></div>
