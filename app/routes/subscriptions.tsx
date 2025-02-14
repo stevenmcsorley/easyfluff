@@ -34,12 +34,28 @@ export const action = async ({ request }: { request: Request }) => {
     return json({ error: "Invalid subscription plan" }, { status: 400 });
   }
 
-  // Insert a new subscription record into the user_subscriptions table.
-  await client.query(
-    `INSERT INTO user_subscriptions (user_id, subscription_id, start_date, active)
-     VALUES ($1, $2, NOW(), true)`,
-    [userId, planId]
+  // Check if the user already has a subscription
+  const existing = await client.query(
+    "SELECT * FROM user_subscriptions WHERE user_id = $1",
+    [userId]
   );
+
+  if (existing.rowCount > 0) {
+    // Update the existing subscription (if user already has one)
+    await client.query(
+      `UPDATE user_subscriptions 
+       SET subscription_id = $1, updated_at = NOW() 
+       WHERE user_id = $2`,
+      [planId, userId]
+    );
+  } else {
+    // Insert a new subscription record
+    await client.query(
+      `INSERT INTO user_subscriptions (user_id, subscription_id, start_date, active)
+       VALUES ($1, $2, NOW(), true)`,
+      [userId, planId]
+    );
+  }
 
   return redirect("/dashboard");
 };
@@ -53,28 +69,21 @@ export default function Subscriptions() {
         Choose Your Subscription Plan
       </h2>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {plans.map(
-          (plan: {
-            id: number;
-            name: string;
-            description: string;
-            price: number;
-          }) => (
-            <div key={plan.id} className="card shadow-lg bg-base-100">
-              <div className="card-body">
-                <h3 className="card-title">{plan.name}</h3>
-                <p>{plan.description}</p>
-                <p className="text-lg font-bold">${plan.price} per month</p>
-                <Form method="post">
-                  <input type="hidden" name="planId" value={plan.id} />
-                  <button type="submit" className="btn btn-primary mt-4">
-                    Select Plan
-                  </button>
-                </Form>
-              </div>
+        {plans.map((plan: any) => (
+          <div key={plan.id} className="card shadow-lg bg-base-100">
+            <div className="card-body">
+              <h3 className="card-title">{plan.name}</h3>
+              <p>{plan.description}</p>
+              <p className="text-lg font-bold">${plan.price} per month</p>
+              <Form method="post">
+                <input type="hidden" name="planId" value={plan.id} />
+                <button type="submit" className="btn btn-primary mt-4">
+                  Select Plan
+                </button>
+              </Form>
             </div>
-          )
-        )}
+          </div>
+        ))}
       </div>
     </div>
   );
