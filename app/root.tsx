@@ -8,9 +8,20 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
+  useLoaderData,
 } from "@remix-run/react";
+import type { LinksFunction, LoaderFunction } from "@remix-run/node";
 
-import type { LinksFunction } from "@remix-run/node";
+import { getSession } from "~/session.server";
+import { json } from "@remix-run/node";
+
+// Loader: Retrieve session data (userId and email) for the header
+export const loader: LoaderFunction = async ({ request }) => {
+  const session = await getSession(request.headers.get("Cookie"));
+  const userId = session.get("userId");
+  const email = session.get("email");
+  return json({ userId, email });
+};
 
 export const links: LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -48,13 +59,36 @@ export default function App() {
 }
 
 function Header() {
+  const { userId, email } = useLoaderData<typeof loader>();
+
   return (
     <header className="navbar bg-base-100 shadow mb-6">
       <div className="flex w-full items-center justify-between px-4">
         <Link to="/" className="btn btn-ghost normal-case text-xl">
           EasyFluff
         </Link>
-        {/* Add any extra header items (e.g. language switcher) here */}
+        <nav>
+          {userId ? (
+            <>
+              <span className="mr-4">Logged in as: {email}</span>
+              <Link to="/dashboard" className="btn btn-sm btn-outline mr-2">
+                Dashboard
+              </Link>
+              <Link to="/auth/logout" className="btn btn-sm btn-ghost">
+                Logout
+              </Link>
+            </>
+          ) : (
+            <>
+              <Link to="/auth/login" className="btn btn-sm btn-outline mr-2">
+                Login
+              </Link>
+              <Link to="/auth/register" className="btn btn-sm btn-ghost">
+                Register
+              </Link>
+            </>
+          )}
+        </nav>
       </div>
     </header>
   );
@@ -70,8 +104,7 @@ function Footer() {
   );
 }
 
-// CatchBoundary: renders for unmatched routes.
-// It returns only inner content so that it’s rendered inside the root layout.
+// CatchBoundary: Renders a custom 404 message when no route is matched.
 export function CatchBoundary() {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-base-200 p-4">
