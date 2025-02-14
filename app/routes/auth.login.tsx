@@ -1,6 +1,7 @@
 // app/routes/auth/login.tsx
 
 import { Form, Link, useActionData } from "@remix-run/react";
+import { commitSession, getSession } from "~/session.server";
 import { json, redirect } from "@remix-run/node";
 
 import type { ActionFunction } from "@remix-run/node";
@@ -20,8 +21,16 @@ export const action: ActionFunction = async ({ request }) => {
     return json({ error: "Invalid email or password" }, { status: 400 });
   }
 
-  // TODO: Set up session cookie to keep user logged in.
-  return redirect("/dashboard");
+  // Create and commit the session
+  const session = await getSession(request.headers.get("Cookie"));
+  session.set("userId", user.id);
+  session.set("role", user.role);
+
+  return redirect("/dashboard", {
+    headers: {
+      "Set-Cookie": await commitSession(session),
+    },
+  });
 };
 
 export default function Login() {
