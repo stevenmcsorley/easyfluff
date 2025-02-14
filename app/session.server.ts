@@ -2,7 +2,6 @@
 
 import { createCookieSessionStorage } from "@remix-run/node";
 
-// Make sure to set SESSION_SECRET in your .env file
 const sessionSecret = process.env.SESSION_SECRET;
 if (!sessionSecret) {
   throw new Error("SESSION_SECRET must be set");

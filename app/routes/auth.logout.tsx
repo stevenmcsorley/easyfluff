@@ -15,6 +15,5 @@ export const action: ActionFunction = async ({ request }) => {
 };
 
 export default function Logout() {
-  // This route doesn't need to render anything because it immediately logs the user out.
   return null;
 }
