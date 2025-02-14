@@ -42,8 +42,7 @@ services:
 # Use an external network "web" shared by both apps
 networks:
   web:
-    name: web
-    driver: bridge
+    external: true
 
 volumes:
   easyfluff_pg_data:
