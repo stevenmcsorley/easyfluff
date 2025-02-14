@@ -3,11 +3,18 @@ import { Link } from "@remix-run/react";
 
 export default function Index() {
   return (
-    <div className="hero min-h-screen bg-base-200">
-      <div className="hero-content text-center">
+    <div
+      className="hero min-h-screen bg-cover bg-center relative"
+      style={{ backgroundImage: "url('/easyfluff.png')" }}
+    >
+      {/* Optional: An overlay for better text contrast */}
+      <div className="absolute inset-0 bg-black opacity-40"></div>
+      <div className="hero-content text-center relative z-10">
         <div className="max-w-md">
-          <h1 className="text-5xl font-bold">Welcome to EasyFluff</h1>
-          <p className="py-6">
+          <h1 className="text-5xl font-bold text-white">
+            Welcome to EasyFluff
+          </h1>
+          <p className="py-6 text-white">
             Say goodbye to laundry day! With EasyFluff, your laundry is picked
             up, washed, folded, and delivered on schedule.
           </p>
