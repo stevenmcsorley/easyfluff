@@ -16,7 +16,6 @@ import type { LinksFunction, LoaderFunction } from "@remix-run/node";
 import { getSession } from "~/session.server";
 import { json } from "@remix-run/node";
 
-// Loader: Retrieve session data (userId and email) for the header.
 export const loader: LoaderFunction = async ({ request }) => {
   const session = await getSession(request.headers.get("Cookie"));
   const userId = session.get("userId");
@@ -48,9 +47,10 @@ export default function App() {
       </head>
       <body className="bg-base-200 text-base-content min-h-screen flex flex-col">
         <Header />
-
-        <Outlet />
-
+        {/* Use w-full to make main content full width */}
+        <main className="w-full flex-1 p-4">
+          <Outlet />
+        </main>
         <Footer />
         <ScrollRestoration />
         <Scripts />
@@ -61,7 +61,6 @@ export default function App() {
 
 function Header() {
   const { userId, email } = useLoaderData<typeof loader>();
-
   return (
     <header className="navbar bg-base-100 shadow mb-6">
       <div className="flex w-full items-center justify-between px-4">
@@ -107,7 +106,6 @@ function Footer() {
   );
 }
 
-// CatchBoundary: Renders a custom 404 message when no route is matched.
 export function CatchBoundary() {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-base-200 p-4">
