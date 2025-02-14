@@ -1,17 +1,25 @@
 // app/routes/orders.tsx
 
-import { json } from "@remix-run/node";
+import { json, redirect } from "@remix-run/node";
+
+import { client } from "~/utils/db.server";
+import { getSession } from "~/session.server";
 import { useLoaderData } from "@remix-run/react";
 
-// Dummy orders data
-const dummyOrders = [
-  { id: 1, status: "Scheduled", date: "2025-02-15" },
-  { id: 2, status: "Delivered", date: "2025-02-08" },
-];
+export const loader = async ({ request }: { request: Request }) => {
+  const session = await getSession(request.headers.get("Cookie"));
+  const userId = session.get("userId");
+  if (!userId) {
+    return redirect("/auth/login");
+  }
 
-export const loader = async () => {
-  // In a real application, fetch the orders for the logged-in user from the database.
-  return json({ orders: dummyOrders });
+  // Query orders for the logged-in user from the database.
+  const result = await client.query(
+    "SELECT * FROM orders WHERE user_id = $1 ORDER BY created_at DESC",
+    [userId]
+  );
+
+  return json({ orders: result.rows });
 };
 
 export default function Orders() {
