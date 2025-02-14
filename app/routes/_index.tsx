@@ -7,7 +7,7 @@ export default function Index() {
       className="hero min-h-screen bg-cover bg-center relative"
       style={{ backgroundImage: "url('/easyfluff.png')" }}
     >
-      {/* Overlay for improved text contrast */}
+      {/* Overlay for better text contrast */}
       <div className="absolute inset-0 bg-black opacity-40"></div>
       <div className="hero-content text-center relative z-10">
         <div className="max-w-md">
