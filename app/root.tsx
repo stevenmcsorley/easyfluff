@@ -2,6 +2,7 @@
 import "./tailwind.css";
 
 import {
+  Form,
   Link,
   Links,
   Meta,
@@ -15,7 +16,7 @@ import type { LinksFunction, LoaderFunction } from "@remix-run/node";
 import { getSession } from "~/session.server";
 import { json } from "@remix-run/node";
 
-// Loader: Retrieve session data (userId and email) for the header
+// Loader: Retrieve session data (userId and email) for the header.
 export const loader: LoaderFunction = async ({ request }) => {
   const session = await getSession(request.headers.get("Cookie"));
   const userId = session.get("userId");
@@ -67,20 +68,22 @@ function Header() {
         <Link to="/" className="btn btn-ghost normal-case text-xl">
           EasyFluff
         </Link>
-        <nav>
+        <nav className="flex items-center space-x-2">
           {userId ? (
             <>
               <span className="mr-4">Logged in as: {email}</span>
-              <Link to="/dashboard" className="btn btn-sm btn-outline mr-2">
+              <Link to="/dashboard" className="btn btn-sm btn-outline">
                 Dashboard
               </Link>
-              <Link to="/auth/logout" className="btn btn-sm btn-ghost">
-                Logout
-              </Link>
+              <Form action="/auth/logout" method="post" reloadDocument>
+                <button type="submit" className="btn btn-sm btn-ghost">
+                  Logout
+                </button>
+              </Form>
             </>
           ) : (
             <>
-              <Link to="/auth/login" className="btn btn-sm btn-outline mr-2">
+              <Link to="/auth/login" className="btn btn-sm btn-outline">
                 Login
               </Link>
               <Link to="/auth/register" className="btn btn-sm btn-ghost">
