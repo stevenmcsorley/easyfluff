@@ -15,7 +15,6 @@ export const loader = async ({ request }: { request: Request }) => {
   }
 
   // Query the available subscription plans from the database
-  // (Assuming you have a "subscriptions" table populated.)
   const result = await client.query(
     "SELECT * FROM subscriptions ORDER BY id ASC"
   );
@@ -36,7 +35,6 @@ export const action = async ({ request }: { request: Request }) => {
   }
 
   // Insert a new subscription record into the user_subscriptions table.
-  // You can customize the fields as needed.
   await client.query(
     `INSERT INTO user_subscriptions (user_id, subscription_id, start_date, active)
      VALUES ($1, $2, NOW(), true)`,
@@ -55,21 +53,28 @@ export default function Subscriptions() {
         Choose Your Subscription Plan
       </h2>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {plans.map((plan: any) => (
-          <div key={plan.id} className="card shadow-lg bg-base-100">
-            <div className="card-body">
-              <h3 className="card-title">{plan.name}</h3>
-              <p>{plan.description}</p>
-              <p className="text-lg font-bold">${plan.price} per month</p>
-              <Form method="post">
-                <input type="hidden" name="planId" value={plan.id} />
-                <button type="submit" className="btn btn-primary mt-4">
-                  Select Plan
-                </button>
-              </Form>
+        {plans.map(
+          (plan: {
+            id: number;
+            name: string;
+            description: string;
+            price: number;
+          }) => (
+            <div key={plan.id} className="card shadow-lg bg-base-100">
+              <div className="card-body">
+                <h3 className="card-title">{plan.name}</h3>
+                <p>{plan.description}</p>
+                <p className="text-lg font-bold">${plan.price} per month</p>
+                <Form method="post">
+                  <input type="hidden" name="planId" value={plan.id} />
+                  <button type="submit" className="btn btn-primary mt-4">
+                    Select Plan
+                  </button>
+                </Form>
+              </div>
             </div>
-          </div>
-        ))}
+          )
+        )}
       </div>
     </div>
   );
