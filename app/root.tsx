@@ -48,9 +48,9 @@ export default function App() {
       </head>
       <body className="bg-base-200 text-base-content min-h-screen flex flex-col">
         <Header />
-        <main className="container mx-auto flex-1 p-4">
-          <Outlet />
-        </main>
+
+        <Outlet />
+
         <Footer />
         <ScrollRestoration />
         <Scripts />
