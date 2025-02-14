@@ -16,7 +16,7 @@ export const loader: LoaderFunction = async ({ request }) => {
     return redirect("/auth/login");
   }
 
-  // Fetch the driver's current status from the users table
+  // Fetch the driver's current status and email from the users table.
   const result = await client.query(
     "SELECT driver_status, email FROM users WHERE id = $1",
     [userId]
@@ -42,7 +42,6 @@ export const action: ActionFunction = async ({ request }) => {
   }
 
   // Update the driver's status in the users table.
-  // Ensure your users table includes a "driver_status" column.
   await client.query(
     "UPDATE users SET driver_status = $1, updated_at = NOW() WHERE id = $2",
     [newStatus, userId]
